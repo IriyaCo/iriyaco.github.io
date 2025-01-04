@@ -1,0 +1,38 @@
+/* Layout */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+/* Theme Icons */
+[data-bs-theme="dark"] .theme-icon-light {
+    display: inline-block;
+}
+
+[data-bs-theme="dark"] .theme-icon-dark {
+    display: none;
+}
+
+[data-bs-theme="light"] .theme-icon-light {
+    display: none;
+}
+
+[data-bs-theme="light"] .theme-icon-dark {
+    display: inline-block;
+}
+
+/* Navbar */
+.navbar {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Footer */
+.footer {
+    border-top: 1px solid var(--bs-border-color);
+    padding: 1rem 0;
+}
