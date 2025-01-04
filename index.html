@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WireGuard Config Generator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            margin-bottom: 10px;
+        }
+        #json_output {
+            font-size: 0.8rem;
+            height: 150px;
+            resize: vertical;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WireGuard Config Generator</h1>
+
+        <form id="wg-config-form">
+            <div class="form-group">
+                <label for="wg_config">Paste WireGuard config:</label>
+                <textarea class="form-control" id="wg_config" rows="10" required></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="generateConfig()">Generate</button>
+        </form>
+
+        <div id="output-section" style="display: none;">
+            <h2>Generated Config:</h2>
+            <div class="form-group">
+                <textarea class="form-control" id="json_output" rows="10" readonly></textarea>
+            </div>
+            <button class="btn btn-secondary" data-clipboard-target="#json_output">Copy to Clipboard</button>
+        </div>
+
+    </div>
+
+    <script>
+        const template = {
+            "interface_name": "wg0",
+            "local_address": [],
+            "mtu": 1280,
+            "peer_public_key": "",
+            "pre_shared_key": "",
+            "private_key": "",
+            "server": "",
+            "server_port": 51820,
+            "system_interface": false,
+            "tag": "proxy",
+            "type": "wireguard"
+        };
+
+        function generateConfig() {
+            const wgConfig = document.getElementById('wg_config').value;
+            const lines = wgConfig.split('\n');
+            const config = {};
+
+            lines.forEach(line => {
+                const [key, value] = line.split('=');
+                if (key && value) {
+                    config[key.trim()] = value.trim();
+                }
+            });
+
+
+            const filledTemplate = JSON.parse(JSON.stringify(template)); // Deep copy
+            filledTemplate.local_address = [config["Address"]]; //Assumes only one address
+            filledTemplate.private_key = config["PrivateKey"];
+            filledTemplate.peer_public_key = config["PublicKey"];
+            if(config["Endpoint"]){
+                const [server, port] = config["Endpoint"].split(':');
+                filledTemplate.server = server;
+                filledTemplate.server_port = parseInt(port);
+            }
+            filledTemplate.pre_shared_key = config["PreSharedKey"];
+
+            const jsonOutput = JSON.stringify(filledTemplate, null, 2);
+            document.getElementById('json_output').value = jsonOutput;
+            document.getElementById('output-section').style.display = 'block';
+
+        }
+
+        new ClipboardJS('.btn');
+    </script>
+</body>
+</html>
